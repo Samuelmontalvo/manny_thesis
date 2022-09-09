@@ -16,13 +16,13 @@ View(Descriptives)
 attach(Descriptives)
 
 #ALL
-Descritives_all <- Descriptives %>% select("Age","Height","Weight",
+Descriptives_all <- Descriptives %>% select("Age","Height","Weight",
                                            "VO2max","HR","Lactate","RPE")
 
-Descritives_all %>%  
+Descriptives_all %>%
   describe(na.rm=T, skew=FALSE, ranges=F)%>%
-  kbl(caption = "Descriptives All participants") %>% 
-  kable_classic(full_width = F, html_font = "Cambria") 
+  kbl(caption = "Descriptives All participants") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 
 # By Sex
 describeBy(Descriptives ~ Sex, na.rm=T, skew=FALSE, ranges=F)
@@ -200,7 +200,8 @@ pwc4 <- pwc4 %>% add_xy_position(x = "Condition") ## Change pwc number
 Re_Retrograde_plot <- ggboxplot(Df, x = "Condition", y = "Re_Retrograde",
                                color = "Condition", palette = get_palette("Set1", 4),
                                ylab = "Reynolds number Retrograde") +
-  stat_pvalue_manual(pwc4,size = 2.8,hide.ns = TRUE) ## Change pwc number
+  stat_pvalue_manual(pwc4,size = 2.8,hide.ns = TRUE) +
+  theme_prism()## Change pwc number
 Re_Retrograde_plot
 #Save Plot
 ggsave("Re_Retrograde.png")
@@ -230,7 +231,7 @@ Df2 %>% group_by(Condition) %>% shapiro_test(Upper_ischemia)
 Df2 %>% group_by(Condition) %>% shapiro_test(Upper_postischemia)
 Df2 %>% group_by(Condition) %>% shapiro_test(Lower_Basal)
 Df2 %>% group_by(Condition) %>% shapiro_test(Lower_ischemia) #Normal
-Df2 %>% group_by(Condition) %>% shapiro_test(Lower_postischemia) 
+Df2 %>% group_by(Condition) %>% shapiro_test(Lower_postischemia)
 
 
 ## Wilcoxon for Non-parametric data
@@ -247,7 +248,7 @@ FMD <- ggboxplot(Df2, x = "Condition", y = "FMD",
   theme_prism() +
   stat_compare_means(method = "wilcox.test", paired = F,
                      label.x = 1.4,
-                     label.y = 28) 
+                     label.y = 28)
 FMD
 ggsave("FMD.png")
 
