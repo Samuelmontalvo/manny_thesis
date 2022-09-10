@@ -87,7 +87,7 @@ Df %>% cohens_d(ESS_Antegrade ~ Condition,
 #Plots
 # Add position for p values in boxplot
 pwc <- pwc %>% add_xy_position(x = "Condition")
-# Boxplot of Vertical Jump Height
+# Boxplot of ESS
 Antegrade_ESS_plot <- ggboxplot(Df, x = "Condition", y = "ESS_Antegrade",
                                 color = "Condition", palette = get_palette("Set1", 4),
                                 ylab = "ESS Antegrade (dynes/cm2)") +
@@ -96,6 +96,15 @@ Antegrade_ESS_plot <- ggboxplot(Df, x = "Condition", y = "ESS_Antegrade",
 #Save Plot
 ggsave("ESS_Antegrade.png")
 
+
+# Boxplot of ESS by sex
+ESS_BySex_Antegrade <- ggboxplot(Df, x = "Condition", y = "ESS_Antegrade",
+                                color = "Sex", palette = get_palette("Set1", 4),
+                                ylab = "ESS Antegrade (dynes/cm2)") +
+  stat_pvalue_manual(pwc,size = 4.5,hide.ns = TRUE) +
+  theme_prism()
+#Save Plot
+ggsave("ESS_BySex_Antegrade.png")
 
 ###### Linear Mixed models ESS retrograde
 lmModel2 = lmer(ESS_Retrograde ~ Condition + Sex + (1|ID),
