@@ -10,33 +10,48 @@ library(ggplot2) #data visualization
 library(ggpubr)#data visualization
 library(ggprism)##makes plots look like graphad
 library(table1) #for descriptives
-##### DESCRIPTIVES
+
+############################ DESCRIPTIVES######################
 Descriptives <- read_excel("Eccentric_Thesis.xlsx",
                         sheet = "Descriptives")
 View(Descriptives)
 attach(Descriptives)
 
-#ALL
-Descriptives_all <- Descriptives %>% select("Age","Height","Weight",
-                                           "VO2max","HR","Lactate","RPE")
+Descriptives <- Descriptives %>%
+  rename(HRmax = HR, Lactatemax=Lactate,RPEmax=RPE)
 
-Descriptives_all %>%
+#ALL
+Descriptives <- Descriptives %>%
+  rename(HRmax = HR, Lactatemax=Lactate,RPEmax=RPE)
+
+Descriptives <- Descriptives %>%  select("Age","Height","Weight",
+                              "VO2max","HRmax","Lactatemax","RPEmax")
+
+Descriptives %>%
   describe(na.rm=T, skew=FALSE, ranges=F)%>% mutate_if(is.numeric, round, 2) %>%
   kbl(caption = "Descriptives All participants") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 
-
-
 # By Sex
 describeBy(Descriptives ~ Sex, na.rm=T, skew=FALSE, ranges=F)
 
+Descriptives_max <- Descriptives %>% select(ID,VO2max,HRmax,Lactatemax,RPEmax)
 
 ############################## ESS AND BF ###########################
 Df <- read_excel("Eccentric_Thesis.xlsx",
                                sheet = "ESS_BFP")
 View(Df)
 attach(Df)
+
+Df <- left_join(Df,Descriptives_max, by ="ID")
+
+Df <- Df %>% rename(VO2 = VO )
+
+Df <- Df %>% mutate(VO2_perc = VO2 / VO2max * 100,
+                    Lactate_perc = Lactate / Lactatemax * 100,
+                    HR_perc = HR / HRmax * 100,
+                    RPE_perc = RPE / RPEmax * 100)
 
 ## Convert from character to factor data
 Df$Sex <- as.factor(Df$Sex)
@@ -48,9 +63,10 @@ Df$Condition <- ordered(Df$Condition,
                                      "Moderate","High"))
 
 
-table1(~ Age + Height + Weight + VO2max + HR + Lactate + RPE | Condition,
+table1(~ Age + Height + Weight + VO2max + HR + Lactate + RPE | Sex*Condition,
        total=F,render.categorical="FREQ (PCTnoNA%)", na.rm = TRUE,data=Df,
-       render.missing=NULL,topclass="Rtable1-grid Rtable1-shade Rtable1-times")
+       render.missing=NULL,topclass="Rtable1-grid Rtable1-shade Rtable1-times",
+       overall=FALSE)
 
 ################# DATA NORMALITY TEST ###############
 
@@ -284,7 +300,7 @@ Df2  %>% wilcox_effsize(FMD ~ Condition)
 FMD <- ggboxplot(Df2, x = "Condition", y = "FMD",
                 color = "Condition", palette = c("#00AFBB", "#FC4E07"),
                 order = c("Pre", "Post"),
-                ylab = "FMD", xlab = "Condition") + theme_prism() +
+                ylab = "FMD", xlab = "Condition")  +
   theme_prism() +
   stat_compare_means(method = "wilcox.test", paired = F,
                      label.x = 1.4,
@@ -498,6 +514,12 @@ p3
 ggarrange(p1,p2,p3)
 
 ############################ CLINICAL ECCENTRIC OUTCOMES #############
+
+
+table1(~ workload + VO2 + VO2_perc + Lactate + Lactate_perc + HR + HR_perc + RPE  | Sex*Condition,
+       total=F,render.categorical="FREQ (PCTnoNA%)", na.rm = TRUE,data=Df,
+       render.missing=NULL,topclass="Rtable1-grid Rtable1-shade Rtable1-times",
+       overall=FALSE)
 
 ###### Linear Mixed models VO2
 lmModel5 = lmer(VO2 ~ Condition + Sex + (1|ID),

@@ -1,0 +1,210 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_document: default
+---
+
+title: "R Notebook"
+  output: officedown::rdocx_document
+---
+
+
+
+
+```{r, message=FALSE, error=FALSE}
+library(table1)
+library(readxl)
+library(flextable)
+library(kableExtra)
+library(officedown)
+library(officer)
+library(lmerTest)
+library(lme4)
+library(rstatix)
+Df <- read_excel("Eccentric_Thesis.xlsx",
+                               sheet = "ESS_BFP")
+
+```
+
+
+```{r}
+
+## Convert from character to factor data
+Df$Sex <- as.factor(Df$Sex)
+Df$Condition <- as.factor(Df$Condition)
+
+## Order conditions
+Df$Condition <- ordered(Df$Condition,
+                          levels = c("Baseline", "Low",
+                                     "Moderate","High"))
+```
+
+<!---BLOCK_LANDSCAPE_START--->
+
+```{r, error=FALSE}
+x <-table1(~  HR + RPE + VO2 + Lactate + workload  | Sex*Condition, render.continuous=c(.="Mean (SD)"),render.missing=NULL,
+          data=Df,overall=FALSE)
+t1flex(x)
+```
+<!---BLOCK_LANDSCAPE_STOP--->
+
+```{r}
+##### DESCRIPTIVES
+Descriptives <- read_excel("Eccentric_Thesis.xlsx",
+                        sheet = "Descriptives")
+
+```
+
+```{r}
+x2 <-table1(~  Age + Height + Weight + VO2max + HR + Lactate +RPE | Sex, render.continuous=c(.="Mean (SD)"),render.missing=NULL,
+          data=Descriptives,overall=FALSE)
+t1flex(x2)
+```
+
+
+
+```{r}
+###### Linear Mixed models VO2
+lmModel5 = lmer(VO2 ~ Condition + Sex + (1|ID),
+                data=Df, REML=FALSE)
+summary(lmModel5)
+# mixed model
+anova(lmModel5)
+#test of the random effects in the model
+rand(lmModel5)
+
+
+```
+
+```{r}
+# Post-hoc pairwise comparisons Holms-Bonferroni correction
+pwc5 <- Df %>%
+  pairwise_t_test(VO2 ~ Condition, paired = TRUE,
+                  p.adjust.method	= "holm")
+pwc5%>% kbl(caption = "Pairwise comparison") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+```{r}
+# Effect size Cohen's D with Hedge's g correction for small sample size
+Df %>% cohens_d(VO2 ~ Condition,
+                paired = TRUE, hedges.correction = TRUE)%>%
+  kbl(caption = "Effect Size") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+```{r}
+###### Linear Mixed models HR
+lmModel6 = lmer(HR ~ Condition + Sex + (1|ID),
+                data=Df, REML=FALSE)
+summary(lmModel6)
+# mixed model
+anova(lmModel6)
+#test of the random effects in the model
+rand(lmModel6)
+
+
+
+
+```
+
+```{r}
+# Post-hoc pairwise comparisons Holms-Bonferroni correction
+pwc6 <- Df %>%
+  pairwise_t_test(HR  ~ Condition, paired = TRUE,
+                  p.adjust.method	= "holm")
+pwc6%>%
+  kbl(caption = "Pairwise comparison") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+```
+
+```{r}
+
+# Effect size Cohen's D with Hedge's g correction for small sample size
+Df %>% cohens_d(HR  ~ Condition,
+                paired = TRUE, hedges.correction = TRUE)%>%
+  kbl(caption = "Effect Size") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+
+```{r}
+###### Linear Mixed models Lactate
+lmModel7 = lmer(Lactate ~ Condition + Sex + (1|ID),
+                data=Df, REML=FALSE)
+summary(lmModel7)
+# mixed model
+anova(lmModel7)
+#test of the random effects in the model
+rand(lmModel7)
+
+
+
+
+```
+
+
+```{r}
+# Post-hoc pairwise comparisons Holms-Bonferroni correction
+pwc6 <- Df %>%
+  pairwise_t_test(Lactate ~ Condition, paired = TRUE,
+                  p.adjust.method	= "holm")
+pwc6%>%
+  kbl(caption = "Pairwise comparison") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+
+```
+
+
+```{r}
+# Effect size Cohen's D with Hedge's g correction for small sample size
+Df %>% cohens_d(Re_Antegrade ~ Condition,
+                paired = TRUE, hedges.correction = TRUE)%>%
+  kbl(caption = "Effect Size") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+
+```{r}
+
+###### Linear Mixed models RPE
+lmModel8 = lmer(RPE ~ Condition + Sex + (1|ID),
+                data=Df, REML=FALSE)
+summary(lmModel8)
+# mixed model
+anova(lmModel8)
+#test of the random effects in the model
+rand(lmModel8)
+
+
+```
+
+
+```{r}
+# Post-hoc pairwise comparisons Holms-Bonferroni correction
+pwc8 <- Df %>%
+  pairwise_t_test(RPE ~ Condition, paired = TRUE,
+                  p.adjust.method	= "holm")
+pwc8%>%
+  kbl(caption = "Pairwise comparison") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+
+```
+
+
+```{r}
+# Effect size Cohen's D with Hedge's g correction for small sample size
+Df %>% cohens_d(RPE ~ Condition,
+                paired = TRUE, hedges.correction = TRUE)%>%
+  kbl(caption = "Effect Size") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
